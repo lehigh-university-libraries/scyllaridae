@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: islandora-tesseract
+  namespace: islandora-metadata
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: islandora-tesseract
+  template:
+    metadata:
+      labels:
+        app: islandora-tesseract
+    spec:
+      containers:
+        - name: scyllaridae-tesseract
+          image: __DOCKER_REPOSITORY__/scyllaridae-tesseract:main
+          resources:
+            requests:
+              memory: "128Mi"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10

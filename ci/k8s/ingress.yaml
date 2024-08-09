@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: islandora-microservices
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  tls:
+    - hosts:
+        - __DOMAIN__
+      secretName: isle-microservices-prod-tls
+  ingressClassName: nginx
+  rules:
+    - host: __DOMAIN__
+      http:
+        paths:
+          - path: /hypercube(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-tesseract
+                port:
+                  number: 8080

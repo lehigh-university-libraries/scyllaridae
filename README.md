@@ -59,6 +59,53 @@ Update your [ISLE docker-compose.yml](https://github.com/Islandora-Devops/isle-s
         <<: [*prod, *fits]
 ```
 
+#### Kubernetes deployment
+
+The demo kubernetes manifests in this repo uses the `ingress-nginx` controller to route requests from a single domain to the proper microservice.
+
+##### Create a self-signed cert (optional)
+
+Your ISLE install already has a self-signed CA used for JWT signing. You can use that CA to self-sign a cert used for TLS termintation on your microservices. You can skip this step if you have a trusted TLS cert/key for your domain already and use that in your kubernetes secret.
+
+From your production ISLE server, generate a TLS cert
+
+```
+DOMAIN=foo.bar.com
+ISLE_DIR=/path/to/your/isle/site/template/dir
+openssl genpkey -algorithm RSA -out key.pem -pkeyopt rsa_keygen_bits:2048
+openssl req -new -key key.pem -out $DOMAIN.csr -subj "/CN=$DOMAIN"
+echo "subjectAltName=DNS:$DOMAIN" > san.cnf
+sudo openssl x509 -req -in $DOMAIN.csr \
+  -CA $ISLE_DIR/certs/rootCA.pem \
+  -CAkey $ISLE_DIR/certs/rootCA-key.pem \
+  -CAcreateserial \
+  -out cert.pem \
+  -days 365 -sha256 \
+  -extfile san.cnf
+rm san.cnf $DOMAIN.csr
+```
+
+You should now have two files: `key.pem` and `cert.pem`. Per [ingress-nginx docs](https://github.com/kubernetes/ingress-nginx/blob/main/docs/examples/PREREQUISITES.md#tls-certificates), you can add them as a secret to the kube namespace you'll be deploying your microservices
+
+##### Create a the TLS secret
+
+```
+kubectl create secret tls isle-microservices-prod-tls --key key.pem --cert cert.pem
+```
+
+#### Apply the kubernetes manifests
+
+Now you can apply your kube manifests, being sure to replace `__DOMAIN__` and `__DOCKER_REPOSITORY__` with the proper valuyes
+
+```
+DOMAIN=foo.bar.com
+DOCKER_REPOSITORY=your.docker.io
+sed -e "s/__DOMAIN__/$DOMAIN/g" \
+    -e "s/__DOCKER_REPOSITORY__/$DOCKER_REPOSITORY/g" \
+    ci/k8s/*.yaml \
+| kubectl apply -f -
+```
+
 ### Configure alpaca and Drupal
 
 Until we define a subscription spec for Islandora Events in this repo, you'll also need to:
