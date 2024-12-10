@@ -1,0 +1,145 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: open-webui
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+spec:
+  tls:
+    - hosts:
+        - __DOMAIN__
+      secretName: __KUBE_TLS_SECRET__
+  ingressClassName: nginx
+  rules:
+    - host: __DOMAIN__
+      http:
+        paths:
+          - path: "/(?!libreoffice|crayfits|homarus|houdini|hypercube|whisper|coverpage|openai\\-htr|cache\\-warmer|mergepdf).*"
+            pathType: Prefix
+            backend:
+              service:
+                name: open-webui-service
+                port:
+                  number: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: open-webui-service
+spec:
+  selector:
+    app: open-webui
+  ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: open-webui
+  name: open-webui-pvc
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-service
+spec:
+  selector:
+    app: ollama
+  ports:
+  - protocol: TCP
+    port: 11434
+    targetPort: 11434
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ollama
+spec:
+  serviceName: "ollama"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: "kubeworker1"
+      containers:
+      - name: ollama
+        image: ollama/ollama:0.5.0
+        ports:
+        - containerPort: 11434
+        resources:
+          requests:
+            cpu: "2000m"
+            memory: "8Gi"
+          limits:
+            memory: "32Gi"
+            nvidia.com/gpu: "4"
+        volumeMounts:
+        - name: ollama-volume
+          mountPath: /root/.ollama
+        tty: true
+  volumeClaimTemplates:
+  - metadata:
+      name: ollama-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 75Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open-webui-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: open-webui
+  template:
+    metadata:
+      labels:
+        app: open-webui
+    spec:
+      containers:
+      - name: open-webui
+        image: ghcr.io/open-webui/open-webui:main
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "500Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+        env:
+        - name: OLLAMA_BASE_URL
+          value: "http://ollama-service.islandora-metadata.svc.cluster.local:11434"
+        - name: WEBUI_AUTH
+          value: "False"
+        - name: WEBUI_NAME
+          value: "Lehigh Ollama"
+        tty: true
+        volumeMounts:
+        - name: webui-volume
+          mountPath: /app/backend/data
+      volumes:
+      - name: webui-volume
+        persistentVolumeClaim:
+          claimName: open-webui-pvc
