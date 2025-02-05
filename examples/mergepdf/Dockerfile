@@ -1,6 +1,6 @@
 ARG TAG=main
 ARG DOCKER_REPOSITORY=lehighlts
-FROM islandora/leptonica:alpine-3.20.2-leptonica-1.84.1-r0 AS leptonica
+FROM islandora/leptonica:alpine-3.20.2-leptonica-1.84.1-r0@sha256:9e9e46a328d8b55a61a352a6b06ff175f98e40cd5773c9bf93aac58fb56b65f7 AS leptonica
 FROM ${DOCKER_REPOSITORY}/scyllaridae-imagemagick:${TAG} AS scyllaridae
 
 RUN --mount=type=bind,from=leptonica,source=/packages,target=/packages \
