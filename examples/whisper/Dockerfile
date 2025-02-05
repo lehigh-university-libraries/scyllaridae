@@ -1,7 +1,7 @@
 ARG TAG=main
 ARG DOCKER_REPOSITORY=lehighlts
 FROM ${DOCKER_REPOSITORY}/scyllaridae:${TAG} AS scyllaridae
-FROM ghcr.io/ggerganov/whisper.cpp:main-cuda
+FROM ghcr.io/ggerganov/whisper.cpp:main-cuda@sha256:2eb507108c363c29399f564929e293509c01c98ba516173ab5b769ce6aafdabb
 
 COPY --from=scyllaridae /app /app
 COPY scyllaridae.yml /app
