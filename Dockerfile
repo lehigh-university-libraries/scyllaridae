@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine3.20@sha256:22caeb4deced0138cb4ae154db260b22d1b2ef893dde7f84415b619beae90901
+FROM golang:1.24-alpine3.20@sha256:9fed4022a220fb64327baa90cddfd98607f3b816cb4f5769187500571f73072d
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -9,11 +9,11 @@ ENV DPKG_VERSION="1.22.6-r1"
 # renovate: datasource=repology depName=alpine_3_20/gnupg
 ENV GNUPG_VERSION="2.4.5-r0"
 # renovate: datasource=repology depName=alpine_3_20/curl
-ENV CURL_VERSION="8.11.1-r1"
+ENV CURL_VERSION="8.12.1-r0"
 # renovate: datasource=repology depName=alpine_3_20/bash
 ENV BASH_VERSION="5.2.26-r0"
 # renovate: datasource=repology depName=alpine_3_20/openssl
-ENV OPENSSL_VERSION="3.3.2-r2"
+ENV OPENSSL_VERSION="3.3.3-r0"
 
 ENV GOSU_VERSION=1.17
 RUN apk add --no-cache --virtual .gosu-deps \
