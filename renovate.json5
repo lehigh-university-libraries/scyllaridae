@@ -5,12 +5,12 @@
     'customManagers:dockerfileVersions',
   ],
   ignorePaths: [
-    "**/node_modules/**",
-    "**/bower_components/**",
-    "**/vendor/**",
-    "**/__tests__/**",
-    "**/tests/**",
-    "**/__fixtures__/**"
+    '**/node_modules/**',
+    '**/bower_components/**',
+    '**/vendor/**',
+    '**/__tests__/**',
+    '**/tests/**',
+    '**/__fixtures__/**',
   ],
   packageRules: [
     {
@@ -56,8 +56,8 @@
   customManagers: [
     {
       customType: 'regex',
-      fileMatch: [
-        '^Dockerfile$',
+      managerFilePatterns: [
+        '/^Dockerfile$/',
       ],
       matchStrings: [
         '#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION="(?<currentValue>.*)"\\s',
