@@ -1,4 +1,4 @@
 mkdocs==1.6.1
-mkdocs-material==9.6.12
-mkdocs-material[imaging]==9.6.12
+mkdocs-material==9.6.13
+mkdocs-material[imaging]==9.6.13
 mkdocs-mermaid2-plugin==1.2.1
