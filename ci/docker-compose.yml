@@ -2,7 +2,7 @@ networks:
     default:
 services:
     fits:
-        image: islandora/fits:main@sha256:97c955ec722f13d05dbf4136a605335e4f674ef03cd096c1e0209fae0b553959
+        image: islandora/fits:main@sha256:a07e2d6cd45199e0710aa8d4d8c82cc826703a2f6982c9b058b25b25c3e69a08
     crayfits:
         image: lehighlts/scyllaridae-fits:${DOCKER_TAG}
         environment:

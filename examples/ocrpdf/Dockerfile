@@ -8,7 +8,7 @@ ENV TESSERACT_VERSION="5.3.4-r0"
 # renovate: datasource=repology depName=alpine_3_20/jq
 ENV JQ_VERSION="1.7.1-r0"
 # renovate: datasource=repology depName=alpine_3_20/ghostscript
-ENV GHOSTSCRIPT_VERSION="10.04.0-r0"
+ENV GHOSTSCRIPT_VERSION="10.05.1-r0"
 # renovate: datasource=repology depName=alpine_3_20/poppler-utils
 ENV POPPLER_VERSION="24.02.0-r2"
 
