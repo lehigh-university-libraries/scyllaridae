@@ -2,7 +2,7 @@ networks:
     default:
 services:
     fits:
-        image: islandora/fits:main@sha256:97c955ec722f13d05dbf4136a605335e4f674ef03cd096c1e0209fae0b553959
+        image: islandora/fits:main@sha256:852d8530b17e5f7d3c5982a50a8ce6932ff90d6824678a9246c449421c5f67a3
     crayfits:
         image: lehighlts/scyllaridae-fits:${DOCKER_TAG}
         environment:
@@ -28,7 +28,7 @@ services:
         environment:
             JWKS_URI: "https://token.actions.githubusercontent.com/.well-known/jwks"
     test:
-        image: alpine@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
+        image: alpine@sha256:8a1f59ffb675680d47db6337b49d22281a139e9d709335b492be023728e11715
         command: sleep 300
         environment:
             DOCKER_TAG: ${DOCKER_TAG}

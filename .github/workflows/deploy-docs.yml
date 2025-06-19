@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
+      uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
 
     - name: ghcr Login
       uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
@@ -32,7 +32,7 @@ jobs:
         password: ${{secrets.GITHUB_TOKEN}}
 
     - name: Build and push dockerhub
-      uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0 # v6
+      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
       with:
         context: docs
         cache-from: type=registry,ref=ghcr.io/lehigh-university-libraries/scyllaridae:cache-docs-main
