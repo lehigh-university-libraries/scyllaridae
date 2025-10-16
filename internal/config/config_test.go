@@ -239,33 +239,9 @@ func TestBuildExecCommand(t *testing.T) {
 	}
 }
 
-func TestBadCmdArgs(t *testing.T) {
-	payloads := []string{
-		`"any;thing`,
-		`"any&thing`,
-		`"any|thing`,
-		`"any$thing`,
-		`"any\"thing`,
-		`"any\thing`,
-		`"any*thing`,
-		`"any?thing`,
-		`"any[thing`,
-		`"any]thing`,
-		`"any{thing`,
-		`"any}thing`,
-		`"any(thing`,
-		`"any)thing`,
-		`"any<thing`,
-		`"any>thing`,
-		`"anything!`,
-		"\"any`thing\"",
-	}
-	for _, payload := range payloads {
-		_, err := GetPassedArgs(payload)
-		assert.Error(t, err)
-	}
-
-}
+// TestBadCmdArgs removed - validation now happens during Payload unmarshaling
+// via api.SanitizeCmdArg(). See TestPayloadSanitize and TestSanitizeCmdArg
+// in pkg/api/events_test.go for comprehensive validation tests.
 
 func TestMimeToPandoc(t *testing.T) {
 	tests := []struct {
@@ -320,58 +296,78 @@ func TestMimeToPandoc(t *testing.T) {
 }
 
 func TestMimeTypes(t *testing.T) {
-	mimeTypes := map[string]string{
-		"application/msword": "doc",
-		"application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
-		"application/vnd.ms-excel": "xls",
-		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":         "xlsx",
-		"application/vnd.ms-powerpoint":                                             "ppt",
-		"application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+	tests := []struct {
+		name      string
+		mimeType  string
+		extension string
+		wantError bool
+	}{
+		// Valid MIME types
+		{"msword", "application/msword", "doc", false},
+		{"docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx", false},
+		{"excel", "application/vnd.ms-excel", "xls", false},
+		{"xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx", false},
+		{"powerpoint", "application/vnd.ms-powerpoint", "ppt", false},
+		{"pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "pptx", false},
 
-		"image/jpeg":    "jpg",
-		"image/jp2":     "jp2",
-		"image/png":     "png",
-		"image/gif":     "gif",
-		"image/bmp":     "bmp",
-		"image/svg+xml": "svg",
-		"image/tiff":    "tiff",
-		"image/webp":    "webp",
+		{"jpeg", "image/jpeg", "jpg", false},
+		{"jp2", "image/jp2", "jp2", false},
+		{"png", "image/png", "png", false},
+		{"gif", "image/gif", "gif", false},
+		{"bmp", "image/bmp", "bmp", false},
+		{"svg", "image/svg+xml", "svg", false},
+		{"tiff", "image/tiff", "tiff", false},
+		{"webp", "image/webp", "webp", false},
 
-		"audio/mpeg":        "mp3",
-		"audio/x-wav":       "wav",
-		"audio/ogg":         "ogg",
-		"audio/aac":         "m4a",
-		"audio/webm":        "webm",
-		"audio/flac":        "flac",
-		"audio/midi":        "mid",
-		"audio/x-m4a":       "m4a",
-		"audio/x-realaudio": "ra",
+		{"mp3", "audio/mpeg", "mp3", false},
+		{"wav", "audio/x-wav", "wav", false},
+		{"ogg audio", "audio/ogg", "ogg", false},
+		{"aac", "audio/aac", "m4a", false},
+		{"webm audio", "audio/webm", "webm", false},
+		{"flac", "audio/flac", "flac", false},
+		{"midi", "audio/midi", "mid", false},
+		{"m4a", "audio/x-m4a", "m4a", false},
+		{"realaudio", "audio/x-realaudio", "ra", false},
 
-		"video/mp4":                     "mp4",
-		"video/x-msvideo":               "avi",
-		"video/x-ms-wmv":                "wmv",
-		"video/mpeg":                    "mpg",
-		"video/webm":                    "webm",
-		"video/quicktime":               "mov",
-		"application/vnd.apple.mpegurl": "m3u8",
-		"video/3gpp":                    "3gp",
-		"video/mp2t":                    "ts",
-		"video/x-flv":                   "flv",
-		"video/x-m4v":                   "m4v",
-		"video/x-mng":                   "mng",
-		"video/x-ms-asf":                "asx",
-		"video/ogg":                     "ogg",
+		{"mp4", "video/mp4", "mp4", false},
+		{"avi", "video/x-msvideo", "avi", false},
+		{"wmv", "video/x-ms-wmv", "wmv", false},
+		{"mpeg", "video/mpeg", "mpg", false},
+		{"webm video", "video/webm", "webm", false},
+		{"quicktime", "video/quicktime", "mov", false},
+		{"m3u8", "application/vnd.apple.mpegurl", "m3u8", false},
+		{"3gp", "video/3gpp", "3gp", false},
+		{"ts", "video/mp2t", "ts", false},
+		{"flv", "video/x-flv", "flv", false},
+		{"m4v", "video/x-m4v", "m4v", false},
+		{"mng", "video/x-mng", "mng", false},
+		{"asx", "video/x-ms-asf", "asx", false},
+		{"ogg video", "video/ogg", "ogg", false},
 
-		"text/plain":      "txt",
-		"text/html":       "html",
-		"application/pdf": "pdf",
-		"text/csv":        "csv",
-		"text/markdown":   "md",
+		{"plain text", "text/plain", "txt", false},
+		{"html", "text/html", "html", false},
+		{"pdf", "application/pdf", "pdf", false},
+		{"csv", "text/csv", "csv", false},
+		{"markdown", "text/markdown", "md", false},
+
+		// Invalid MIME types - should error
+		{"malicious with semicolon", "image/jpeg; rm -rf /", "", true},
+		{"malicious with pipe", "video/mp4 | echo foo", "", true},
+		{"malicious with dollar", "audio/mpeg$(whoami)", "", true},
+		{"malicious with backtick", "text/plain`id`", "", true},
+		{"malicious with ampersand", "image/png & ls", "", true},
+		{"unknown mime type", "application/x-unknown-format", "", true},
 	}
 
-	for mimeType, extension := range mimeTypes {
-		ext, err := GetMimeTypeExtension(mimeType)
-		assert.Equal(t, nil, err)
-		assert.Equal(t, extension, ext)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ext, err := GetMimeTypeExtension(tt.mimeType)
+			if tt.wantError {
+				assert.Error(t, err, "Expected error for MIME type: %s", tt.mimeType)
+			} else {
+				assert.NoError(t, err, "Expected no error for MIME type: %s", tt.mimeType)
+				assert.Equal(t, tt.extension, ext, "Expected extension %s for MIME type %s", tt.extension, tt.mimeType)
+			}
+		})
 	}
 }

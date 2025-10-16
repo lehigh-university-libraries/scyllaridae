@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"regexp"
 	"strings"
 
 	"github.com/google/shlex"
@@ -286,24 +285,13 @@ func GetMimeTypeExtension(mimeType string) (string, error) {
 	return strings.TrimPrefix(extensions[len(extensions)-1], "."), nil
 }
 
-// GetPassedArgs parses and validates command-line arguments from a string.
-// It uses shell-style parsing and validates each argument against a whitelist regex
-// to prevent command injection attacks.
+// GetPassedArgs parses command-line arguments from a string using shell-style parsing.
+// Note: Validation happens during event unmarshaling via api.SanitizeCmdArg(),
+// so this function only needs to split the arguments.
 func GetPassedArgs(args string) ([]string, error) {
 	passedArgs, err := shlex.Split(args)
 	if err != nil {
 		return nil, fmt.Errorf("error splitting args %s: %v", args, err)
-	}
-
-	// make sure args are OK
-	regex, err := regexp.Compile(`^[a-zA-Z0-9._\-:\/@ =]+$`)
-	if err != nil {
-		return nil, fmt.Errorf("failed to compile regex: %v", err)
-	}
-	for _, value := range passedArgs {
-		if !regex.MatchString(value) {
-			return nil, fmt.Errorf("invalid input for passed arg: %s", value)
-		}
 	}
 
 	return passedArgs, nil

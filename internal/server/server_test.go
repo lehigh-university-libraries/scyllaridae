@@ -142,8 +142,6 @@ func TestIntegration(t *testing.T) {
 	tests := []Test{
 		{
 			name:                "cURL pass no auth",
-			authHeader:          "foo",
-			requestAuth:         "bar",
 			expectedStatus:      http.StatusOK,
 			returnedBody:        "foo",
 			expectedBody:        "foo",
@@ -163,8 +161,8 @@ cmdByMimeType:
 		},
 		{
 			name:                "cURL fail with bad auth",
-			authHeader:          "foo",
-			requestAuth:         "bar",
+			authHeader:          "bearer foo.bar.baz",
+			requestAuth:         "bearer foo.baz.bar",
 			expectedStatus:      http.StatusFailedDependency,
 			returnedBody:        "foo",
 			expectedBody:        "Failed Dependency\n",
@@ -184,8 +182,8 @@ cmdByMimeType:
 		},
 		{
 			name:                "cURL pass with auth",
-			authHeader:          "pass",
-			requestAuth:         "pass",
+			authHeader:          "bearer foo.bar.baz",
+			requestAuth:         "bearer foo.bar.baz",
 			expectedStatus:      http.StatusOK,
 			returnedBody:        "foo",
 			expectedBody:        "foo",
@@ -205,7 +203,6 @@ cmdByMimeType:
 		},
 		{
 			name:                "cURL fail no auth bad output",
-			requestAuth:         "pass",
 			expectedStatus:      http.StatusOK,
 			returnedBody:        "foo",
 			expectedBody:        "bar",
@@ -225,8 +222,8 @@ cmdByMimeType:
 		},
 		{
 			name:                "cURL fail bad output",
-			authHeader:          "pass",
-			requestAuth:         "pass",
+			authHeader:          "bearer foo.bar.baz",
+			requestAuth:         "bearer foo.bar.baz",
 			expectedStatus:      http.StatusOK,
 			returnedBody:        "foo",
 			expectedBody:        "bar",
@@ -246,8 +243,8 @@ cmdByMimeType:
 		},
 		{
 			name:                "test mimetype to ext conversion",
-			authHeader:          "pass",
-			requestAuth:         "pass",
+			authHeader:          "bearer foo.bar.baz",
+			requestAuth:         "bearer foo.bar.baz",
 			expectedStatus:      http.StatusOK,
 			expectedBody:        "ppt txt\n",
 			expectMismatch:      false,
@@ -267,8 +264,8 @@ cmdByMimeType:
 		},
 		{
 			name:                "test bad mimetype succeeds if not getting extension",
-			authHeader:          "pass",
-			requestAuth:         "pass",
+			authHeader:          "bearer foo.bar.baz",
+			requestAuth:         "bearer foo.bar.baz",
 			expectedStatus:      http.StatusOK,
 			expectedBody:        "OK\n",
 			expectMismatch:      false,
@@ -287,8 +284,8 @@ cmdByMimeType:
 		},
 		{
 			name:                "test bad mimetype",
-			authHeader:          "pass",
-			requestAuth:         "pass",
+			authHeader:          "bearer foo.bar.baz",
+			requestAuth:         "bearer foo.bar.baz",
 			expectedStatus:      http.StatusBadRequest,
 			expectedBody:        "Bad request\n",
 			expectMismatch:      false,
@@ -511,12 +508,8 @@ cmdByMimeType:
 		},
 		{
 			name:                "cURL fail with no auth",
-			authHeader:          "foo",
-			requestAuth:         "bar",
 			expectedStatus:      http.StatusBadRequest,
-			returnedBody:        "foo",
 			expectedBody:        "Missing Authorization header\n",
-			expectMismatch:      false,
 			mimetype:            "text/plain",
 			destinationMimeType: "application/xml",
 			yml: `

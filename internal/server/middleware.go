@@ -51,6 +51,10 @@ func (s *Server) LoggingMiddleware(next http.Handler) http.Handler {
 		// this allows us to read streams needed to process the request only once
 		message, err := api.DecodeAlpacaMessage(r, auth)
 		if err != nil {
+			if strings.HasPrefix(err.Error(), "payload validation failed") {
+				http.Error(w, "Bad request", http.StatusBadRequest)
+				return
+			}
 			slog.Error("Error decoding alpaca message", "err", err)
 			http.Error(w, "Internal error", http.StatusInternalServerError)
 			return
